@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Maths AR:Explorer</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- ✅ KIDS MODE BUTTON -->
+<button id="kidsBtn">🧸 Kids Mode 🧸</button>
+
+<div class="app">
+  <div class="stage">
+    <video id="video" autoplay muted playsinline></video>
+    <canvas id="overlay" class="overlay"></canvas>
+  </div>
+
+  <div class="panel">
+    <h2>AR Fractions</h2>
+
+    <p><b>Object:</b> <span id="obj">—</span></p>
+    <p><b>Confidence:</b> <span id="conf">—</span></p>
+    <p><b>Fraction:</b> <span id="fraction">—</span></p>
+    <p><b>Percentage:</b> <span id="percent">—</span></p>
+
+    <label>Grid Cells
+      <input id="gridCount" type="number" value="12" min="2" max="48">
+    </label>
+
+    <div id="grid" class="grid"></div>
+
+    <p><b>Level:</b> <span id="level">3</span></p>
+    <p><b>Target:</b> <span id="target">—</span></p>
+    <p><b>Score:</b> <span id="score">0</span></p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2"></script>
+
+<script>
+const video = document.getElementById("video");
+const canvas = document.getElementById("overlay");
+const ctx = canvas.getContext("2d");
+
+const obj = document.getElementById("obj");
+const conf = document.getElementById("conf");
+const fractionEl = document.getElementById("fraction");
+const percentEl = document.getElementById("percent");
+const grid = document.getElementById("grid");
+const gridCountInput = document.getElementById("gridCount");
+
+const targetEl = document.getElementById("target");
+const scoreEl = document.getElementById("score");
+
+let model;
+let smooth = 0;
+let score = 0;
+let targetNum = 0;
+let targetDen = 12;
+
+/* ================= CAMERA ================= */
+async function startCamera(){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:"environment" }
+    });
+    video.srcObject = stream;
+
+    await new Promise(resolve=>{
+      video.onloadedmetadata = resolve;
+    });
+
+    video.play();
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    ctx.setTransform(-1,0,0,1,canvas.width,0);
+
+    startDetection();
+  }catch(e){
+    alert("Camera access denied. Allow camera & reload.");
+  }
+}
+
+/* ================= GRID ================= */
+function drawGrid(total, filled) {
+  grid.innerHTML = "";
+  for (let i = 0; i < total; i++) {
+    const c = document.createElement("div");
+    c.className = "cell" + (i < filled ? " filled" : "");
+    grid.appendChild(c);
+  }
+}
+
+/* ================= LEVEL 3 TARGET ================= */
+function newTarget() {
+  targetDen = parseInt(gridCountInput.value) || 12;
+  targetNum = Math.floor(Math.random() * (targetDen - 1)) + 1;
+  targetEl.innerText = targetNum + "/" + targetDen;
+}
+newTarget();
+
+/* ================= MODEL ================= */
+async function startDetection(){
+  model = await cocoSsd.load();
+  detect();
+}
+
+async function detect(){
+  if(video.readyState !== 4){
+    requestAnimationFrame(detect);
+    return;
+  }
+
+  const preds = await model.detect(video);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  if(preds.length){
+    const p = preds[0];
+
+    obj.innerText = p.class;
+    conf.innerText = (p.score * 100).toFixed(1) + "%";
+
+    const area = p.bbox[2] * p.bbox[3];
+    const frame = canvas.width * canvas.height;
+
+    smooth = smooth * 0.85 + (area / frame) * 0.15;
+
+    const total = parseInt(gridCountInput.value) || 12;
+    const filled = Math.max(0, Math.min(total, Math.round(smooth * total)));
+
+    /* ✅ FRACTION & % ARE MATHEMATICALLY EQUAL */
+    fractionEl.innerText = filled + "/" + total;
+    percentEl.innerText = ((filled / total) * 100).toFixed(1) + "%";
+
+    drawGrid(total, filled);
+
+    if(filled === targetNum){
+      score += 10;
+      scoreEl.innerText = score;
+      newTarget();
+    }
+  }
+  requestAnimationFrame(detect);
+}
+
+startCamera();
+</script>
+
+<!-- ================= KIDS MODE ================= -->
+<script>
+const kidsBtn = document.getElementById("kidsBtn");
+let kidsMode = false;
+
+kidsBtn.addEventListener("click",()=>{
+  kidsMode = !kidsMode;
+  document.body.classList.toggle("kids", kidsMode);
+  kidsBtn.classList.toggle("kids-btn", kidsMode);
+  kidsBtn.textContent = kidsMode ? "🧸 Kids Mode ON" : "🧸 Kids Mode 🧸";
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,251 @@
+/* =========================
+   GLOBAL RESET & BASE
+========================= */
+*{
+  box-sizing:border-box;
+}
+html,body{
+  margin:0;
+  padding:0;
+  height:100%;
+  background:#000;
+  color:#dffaff;
+  font-family:"Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+  overflow-x:hidden;
+}
+
+/* =========================
+   FLOATING BUTTONS
+========================= */
+
+/* RATE BUTTON (TOP RIGHT) */
+#rateBtn{
+  position:fixed;
+  top:14px;
+  right:14px;
+  background:linear-gradient(90deg,#00eaff,#8b00ff);
+  color:#fff;
+  border:none;
+  padding:10px 16px;
+  border-radius:18px;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 0 18px rgba(0,234,255,.6);
+  z-index:100000;
+}
+
+/* GAME + KIDS (BOTTOM RIGHT) */
+#gameBtn,#kidsBtn{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  height:52px;
+  min-height:52px;
+  padding:0 22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  font-weight:600;
+  color:#fff;
+  background:linear-gradient(90deg,#00eaff,#8b00ff);
+  border:none;
+  border-radius:22px;
+  cursor:pointer;
+  box-shadow:0 0 22px rgba(0,234,255,.6);
+  z-index:100000;
+}
+
+/* STACK GAME ABOVE KIDS */
+#gameBtn{
+  bottom:82px;
+}
+
+/* =========================
+   APP LAYOUT
+========================= */
+.app{
+  display:flex;
+  gap:16px;
+  padding:60px 16px 16px;
+  min-height:100vh;
+  justify-content:center;
+  align-items:flex-start;
+}
+
+.stage{
+  position:relative;
+  width:100%;
+  max-width:1000px;
+  height:60vh;
+  min-height:320px;
+  background:#020202;
+  border-radius:14px;
+  overflow:hidden;
+  border:2px solid #00eaff;
+  box-shadow:0 0 25px rgba(0,234,255,.4);
+}
+
+video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform:scaleX(-1);
+}
+
+canvas.overlay{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+/* =========================
+   CONTROL PANEL
+========================= */
+.panel{
+  width:340px;
+  min-width:260px;
+  background:#030b15;
+  padding:18px;
+  border-radius:14px;
+  border:2px solid #8b00ff;
+  box-shadow:0 0 25px rgba(139,0,255,.35);
+}
+
+h2{
+  text-align:center;
+  color:#00eaff;
+  margin:0 0 10px;
+  text-shadow:0 0 15px #00eaff;
+}
+
+p{margin:6px 0}
+
+/* =========================
+   GRID
+========================= */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:6px;
+  margin-top:12px;
+}
+
+.cell{
+  width:28px;
+  height:28px;
+  border-radius:6px;
+  background:#1b1b1b;
+  border:1px solid #222;
+}
+
+.cell.filled{
+  background:#00eaff;
+  box-shadow:0 0 14px #00eaff,inset 0 0 14px #00eaff;
+}
+
+/* =========================
+   NORMAL BUTTONS
+========================= */
+.btn{
+  width:100%;
+  margin-top:10px;
+  padding:10px;
+  background:#8b00ff;
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:15px;
+  box-shadow:0 0 18px rgba(139,0,255,.4);
+}
+
+.btn:hover{
+  transform:scale(1.05);
+}
+
+/* =========================
+   ✅ KIDS MODE (FINAL)
+========================= */
+body.kids{
+  background:linear-gradient(135deg,#ffecd2,#fcb69f,#ff9a9e);
+  color:#2b2b2b;
+}
+
+body.kids .panel{
+  background:#fff3ea;
+  border-color:#ff7a59;
+}
+
+body.kids h2{
+  color:#ff7a59;
+  text-shadow:none;
+}
+
+/* Bigger, clearer fraction grid for kids */
+body.kids .grid{
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+body.kids .cell{
+  height:46px;
+  border-radius:12px;
+}
+
+body.kids .cell.filled{
+  background:#ff7a59;
+  box-shadow:0 0 18px #ff7a59;
+}
+
+/* Kids button active glow */
+.kids-btn{
+  background:linear-gradient(90deg,#ff7a59,#ffb08a)!important;
+  box-shadow:0 0 22px rgba(255,122,89,.7)!important;
+  animation:bounce 1s infinite;
+}
+
+@keyframes bounce{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
+}
+
+/* =========================
+   SNOW EFFECT
+========================= */
+.snowflake{
+  position:fixed;
+  top:-10px;
+  color:white;
+  animation:fall linear infinite;
+  z-index:99999;
+}
+
+@keyframes fall{
+  to{transform:translateY(110vh)}
+}
+
+/* =========================
+   📱 Mobile Camera Fix
+========================= */
+@media (max-width: 768px) {
+  .app {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stage {
+    width: 95vw;
+    height: 65vh;
+    min-height: 300px;
+  }
+
+  .panel {
+    width: 95vw;
+    margin-top: 12px;
+  }
+
+  video {
+    object-fit: cover;
+  }
+}
